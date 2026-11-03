@@ -1,0 +1,12 @@
+gametitle=MVP Baseball 2003 (NTSC-U)(SLUS-20650) [Korean]
+
+[Widescreen 16:9]
+gsaspectratio=16:9
+author=Arapapa (PCSX2 patches.zip, SLUS-20650_55493524) / 한글판 CRC로 이식
+description=3D 줌·시야각 16:9 보정
+
+//803f013c 00008144 380017e6
+patch=1,EE,004ecfa8,word,3c013f40 //3c013f80 zoom
+
+//803f013c 00108144 83b50146
+patch=1,EE,004ed038,word,3c013fab //3c013f80 fov
