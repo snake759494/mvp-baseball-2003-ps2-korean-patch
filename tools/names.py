@@ -91,12 +91,18 @@ def load(path):
     return tb
 
 
+KOREAN = {('Chan Ho', 'Park'): '박찬호', ('Byung-Hyun', 'Kim'): '김병현', ('Sun-Woo', 'Kim'): '김선우',
+          ('Hee Seop', 'Choi'): '최희섭', ('Jung', 'Bong'): '봉중근'}
+
+
 def convert_dat(dat, tb, miss):
     """first_name/last_name 필드(0 , 1 )를 바꾼다"""
     t = dat.decode('latin1')
     if not t.startswith('0 first_name,1 last_name,'): return dat
     def rep(m):
         a, b = m.group(1), m.group(2)
+        if (a, b) in KOREAN:   # 한국 선수: 이치로처럼 이름 칸을 비우고 성 칸에 성명 전체 ("찬. 박" 방지)
+            return ',0 ,1 %s,' % enc(KOREAN[a, b]).decode('latin1')
         for x in (a, b):
             if x not in tb: miss.add(x)
         return ',0 %s,1 %s,' % (enc(tb.get(a, a)).decode('latin1'), enc(tb.get(b, b)).decode('latin1'))

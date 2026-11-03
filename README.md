@@ -1,10 +1,10 @@
 # MVP 베이스볼 2003 PS2 한글패치
 
-PS2 북미판 **MVP Baseball 2003 (SLUS-20650)**용 비공식 한국어 패치입니다. **메뉴·옵션·시즌·프랜차이즈·경기 HUD 등 게임 문자열**, **로딩 화면 그림 15장**, **선수 이름 전부**(실제 선수 DB와 신인·드래프트 이름 풀)를 한국어로 바꿨습니다. PCSX2용 **16:9 와이드 패치**도 함께 배포합니다. 현재 배포판은 **v1.2 (2026-11-03)**입니다.
+PS2 북미판 **MVP Baseball 2003 (SLUS-20650)**용 비공식 한국어 패치입니다. **메뉴·옵션·시즌·프랜차이즈·경기 HUD 등 게임 문자열**, **로딩 화면 그림 15장**, **선수 이름 전부**(실제 선수 DB와 신인·드래프트 이름 풀)를 한국어로 바꿨습니다. PCSX2용 **16:9 와이드 패치**도 함께 배포합니다. 현재 배포판은 **v1.3 (2026-11-03)**입니다.
 
 [패치 다운로드](https://github.com/snake759494/mvp-baseball-2003-ps2-korean-patch/releases/latest) · [기술 설명](docs/TECHNICAL.md) · [재빌드](docs/BUILD.md) · [변경 기록](CHANGELOG.md) · [권리 안내](RIGHTS.md)
 
-릴리즈 첨부 파일은 한글패치 **MVP_Baseball_2003_PS2_KO_v1.2.xdelta**와 와이드 패치 **SLUS-20650_20A53021.pnach**입니다. 저장소에는 제작 소스와 한국어 번역만 공개합니다. 원본·완성 디스크 이미지, 추출한 게임 파일, 영어 원문, 글꼴 파일, 외부 실행 파일은 포함하지 않습니다. GitHub가 자동으로 만드는 Source code ZIP/TAR는 저장소 소스를 압축한 것이며 게임 파일이 아닙니다.
+릴리즈 첨부 파일은 한글패치 **MVP_Baseball_2003_PS2_KO_v1.3.xdelta**와 와이드 패치 **SLUS-20650_20A53021.pnach**입니다. 저장소에는 제작 소스와 한국어 번역만 공개합니다. 원본·완성 디스크 이미지, 추출한 게임 파일, 영어 원문, 글꼴 파일, 외부 실행 파일은 포함하지 않습니다. GitHub가 자동으로 만드는 Source code ZIP/TAR는 저장소 소스를 압축한 것이며 게임 파일이 아닙니다.
 
 ## 게임 소개 및 대상 버전
 
@@ -22,11 +22,11 @@ PS2 북미판 **MVP Baseball 2003 (SLUS-20650)**용 비공식 한국어 패치�
 | **원본 ISO MD5** | `e7827b06876466832f6528cbecd455d4` |
 | 원본 ISO SHA-1 | `8069da937f16a3c04fd860ab3be639e35a15dbe8` |
 | 원본 ISO SHA-256 | `887fcd0e6b72e6f8e35d5df0b15f7b149d5dc1a636b23cd00ef1d74c56fd7304` |
-| xdelta 파일 크기 | 4,191,028 바이트 |
-| xdelta SHA-256 | `a3a8edc25fb3773fa02e4de188926a6f6f43d0225301242a430c2d6699fc1790` |
+| xdelta 파일 크기 | 5,264,779 바이트 |
+| xdelta SHA-256 | `27b2e771d72cd8123a2476093ea9a4678338e2854c8383f8c30b986dced9495b` |
 | 적용 결과 ISO 크기 | 2,003,593,216 바이트 |
-| 적용 결과 ISO SHA-1 | `a2127624d3fbae4df7f7ba1643df630c918cefc9` |
-| 적용 결과 ISO SHA-256 | `adc8e6f2ce4ba427dd2a7ee5b9ffa14253a507ce06ce3a0ad171f7e0e1c94845` |
+| 적용 결과 ISO SHA-1 | `5dc448425b3ee64a0ef5ca29f6f898eba42cb772` |
+| 적용 결과 ISO SHA-256 | `3f944db191c2d02802a3fa55c7e0f039e0829dd1ca60c5343bdc6293676fd747` |
 | 적용 결과 게임 CRC (PCSX2) | `20A53021` |
 
 원본 게임 파일은 사용자가 직접 준비해야 합니다.
@@ -41,7 +41,7 @@ Get-FileHash -Algorithm MD5 -LiteralPath '.\MVP Baseball 2003 (USA).iso'
 
 ### xdelta UI 사용
 
-1. 릴리즈에서 `MVP_Baseball_2003_PS2_KO_v1.2.xdelta`를 받습니다.
+1. 릴리즈에서 `MVP_Baseball_2003_PS2_KO_v1.3.xdelta`를 받습니다.
 2. xdelta3 패치를 지원하는 도구에서 **Apply Patch** 기능을 엽니다.
 3. **Patch**에는 xdelta 파일을, **Source File**에는 해시가 일치하는 원본 `.iso`를 선택합니다.
 4. **Output File**에는 새 파일 이름을 지정합니다(예: `MVP Baseball 2003 (Korean).iso`).
@@ -51,7 +51,7 @@ xdelta는 호환성을 위해 압축·2차 압축·파일 경로 헤더 없이 �
 ### 명령줄 사용
 
 ```powershell
-.\xdelta3.exe -d -s '.\MVP Baseball 2003 (USA).iso' '.\MVP_Baseball_2003_PS2_KO_v1.2.xdelta' '.\MVP Baseball 2003 (Korean).iso'
+.\xdelta3.exe -d -s '.\MVP Baseball 2003 (USA).iso' '.\MVP_Baseball_2003_PS2_KO_v1.3.xdelta' '.\MVP Baseball 2003 (Korean).iso'
 ```
 
 원본판 세이브 스테이트는 쓰지 마세요. 메모리 카드 세이브는 원본판과 호환됩니다.

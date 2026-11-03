@@ -1,10 +1,10 @@
 {
- "version": "v1.2",
+ "version": "v1.3",
  "date": "2026-11-03",
  "game": "MVP Baseball 2003 (USA) / SLUS-20650 / PS2 (DVD ISO)",
- "asset": "MVP_Baseball_2003_PS2_KO_v1.2.xdelta",
- "asset_size": 4191028,
- "asset_sha256": "a3a8edc25fb3773fa02e4de188926a6f6f43d0225301242a430c2d6699fc1790",
+ "asset": "MVP_Baseball_2003_PS2_KO_v1.3.xdelta",
+ "asset_size": 5264779,
+ "asset_sha256": "27b2e771d72cd8123a2476093ea9a4678338e2854c8383f8c30b986dced9495b",
  "xdelta_options": "xdelta3 -e -0 -S none -A (no compression, no secondary compression, no application header)",
  "widescreen_asset": "SLUS-20650_20A53021.pnach",
  "widescreen_size": 391,
@@ -14,8 +14,8 @@
  "source_iso_sha1": "8069da937f16a3c04fd860ab3be639e35a15dbe8",
  "source_iso_sha256": "887fcd0e6b72e6f8e35d5df0b15f7b149d5dc1a636b23cd00ef1d74c56fd7304",
  "output_iso_size": 2003593216,
- "output_iso_md5": "57d713280682f9d5648deebfc624a94c",
- "output_iso_sha1": "a2127624d3fbae4df7f7ba1643df630c918cefc9",
- "output_iso_sha256": "adc8e6f2ce4ba427dd2a7ee5b9ffa14253a507ce06ce3a0ad171f7e0e1c94845",
+ "output_iso_md5": "d0acb0667097dc529ad1a5821b89e0ad",
+ "output_iso_sha1": "5dc448425b3ee64a0ef5ca29f6f898eba42cb772",
+ "output_iso_sha256": "3f944db191c2d02802a3fa55c7e0f039e0829dd1ca60c5343bdc6293676fd747",
  "output_elf_crc": "20A53021"
 }
