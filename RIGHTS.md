@@ -10,4 +10,4 @@
 
 16:9 와이드 패치의 코드 두 줄은 PCSX2 배포 패치 모음의 Arapapa 패치(원본판 CRC 55493524)를 한글판 CRC에 맞춰 옮긴 것입니다.
 
-xdelta, PCSX2, Python 라이브러리(numpy, Pillow, OpenCV) 등 외부 도구는 각 프로젝트의 라이선스를 따르며, 바이너리는 재배포하지 않습니다. 게임 코드를 디스어셈블한 결과물은 넣지 않았고, 해석한 내용만 `docs/TECHNICAL.md`에 정리했습니다. 단, ELF에 넣는 짧은 MIPS 코드(한글 이름 해석)는 `tools/names.py`에 들어 있습니다.
+xdelta, PCSX2, Python 라이브러리(numpy, Pillow, OpenCV) 등 외부 도구는 각 프로젝트의 라이선스를 따르며, 바이너리는 재배포하지 않습니다. 게임 코드를 디스어셈블한 결과물은 넣지 않았고, 해석한 내용만 `docs/TECHNICAL.md`에 정리했습니다. 단, ELF에 넣는 짧은 MIPS 코드(한글 이름 해석, 폰트 메모리 배치)는 `tools/names.py`, `tools/fontmem.py`에 들어 있습니다.

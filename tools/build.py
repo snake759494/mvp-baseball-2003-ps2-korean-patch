@@ -67,6 +67,8 @@ def main():
     nchars = ''.join(names.load(P('translation', 'names.txt')).values())
     ko = lambda ss: {c for s in ss for c in s if ord(c) >= 0xac00 or 0x3131 <= ord(c) <= 0x318e or c in '·→↔…'}
     chars = sorted(ko(strs + [nchars]))   # UI 문자열 + 선수 이름
+    chars_ui = sorted(ko(strs))
+    if os.environ.get('TINY'): chars = chars_ui = sorted(set(os.environ['TINY']))   # AU20B(기울임 제목·메뉴체)는 선수 이름을 쓰지 않아 UI 글자만
     print(f'번역 {len(tr)}/{len(strs)}, 한글 {len(chars)}자')
     out['DATA/ENGLISH.LOC'] = loc.write(pre, lh, strs)
     # 화면 레이아웃(FEL): 공유 문자열 분리(새 ID), 위치 보정
@@ -95,10 +97,10 @@ def main():
     from PIL import Image
     newf = {}
     for n in FONTS:
-        b, img = kfont.build(n, get('DATA/FONTS/' + n), chars)
+        b, img = kfont.build(n, get('DATA/FONTS/' + n), chars_ui if n == 'AU20B_EN.SFN' else chars)
         newf[n.lower()] = b; out['DATA/FONTS/' + n] = b
         Image.fromarray(img * 17).save(P('work', 'preview', n + '.png'))
-        print(f'  {n}: 텍스처 {img.shape[1]}x{img.shape[0]}')
+        print(f'  {n}: 텍스처 {img.shape[1]}x{img.shape[0]}, 한글 {kfont.INFO[n][0]}->{kfont.INFO[n][1]}px')
     fb = get('DATA/FONTS/FONTS.BIG')
     n = struct.unpack('>I', fb[8:12])[0]; p = 16; ents = []
     for _ in range(n):
@@ -121,7 +123,8 @@ def main():
     out['DATA/FRONTEND/SUSHARED.BIG'], img = loadko.license(get('DATA/FRONTEND/SUSHARED.BIG'))
     img.save(P('work', 'preview', 'LICENSE.png'))
     # 선수 이름: ELF에 2바이트 한글 해석 패치 + DATABASE.BIG 이름 변환
-    out['SLUS_206.50'] = names.elf_patch(get('SLUS_206.50'))
+    import fontmem
+    out['SLUS_206.50'] = fontmem.elf_patch(names.elf_patch(get('SLUS_206.50')))
     tb = names.load(P('translation', 'names.txt')); miss = set()
     ents = [(nm, refpack.compress(names.convert_dat(refpack.unpack(dat), tb, miss)))
             for nm, dat in c0fb.files(get('DATA/DATABASE.BIG'))]

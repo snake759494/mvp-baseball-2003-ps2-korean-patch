@@ -22,6 +22,23 @@ CFG = {
 
 
 LINE = {}
+MAXW, MAXH = 512, 512
+INFO = {}
+
+
+def pack_shelf(rend, ow, oh, W, H):
+    """높이순 선반 채우기. 원본 글리프 블록(ow x oh) 오른쪽 빈 곳부터. 넘치면 None"""
+    order = sorted(rend, key=lambda r: -r[1].shape[0])
+    x, y, rh = ow + 1, 0, 0; place = []
+    for code, g, xo, yo in order:
+        h, w = g.shape
+        if x + w > W:
+            y += rh + 1; rh = 0; x = ow + 1 if y < oh + 1 else 0
+        if y + h > H: return None
+        if y < oh + 1 and y + h >= oh + 1 and x <= ow:   # 원본 블록과 겹침 방지
+            return None
+        place.append((code, x, y, g, xo, yo)); x += w + 1; rh = max(rh, h)
+    return W, max(y + rh, oh), place
 
 
 def parse(b):
@@ -58,35 +75,28 @@ def build(name, raw, chars):
         bb = ImageFont.truetype(NANUM[w8], px + 1).getbbox('한', anchor='ls')
         if bb[3] - bb[1] > target + 1: break
         px += 1
-    font = ImageFont.truetype(NANUM[w8], px)
-    hb = font.getbbox('한', anchor='ls')
-    rend = []
-    for ch in chars:
-        a, ox, by = render(font, ch, px, shear)
-        ys, xs = np.nonzero(a)
-        if len(xs) == 0: continue
-        if ch in '·→↔…' and font.getbbox(ch)[2] == 0: continue
-        x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
-        g = np.clip((a[y0:y1, x0:x1].astype(np.int32) * 15 + 127) // 255, 0, 15).astype(np.uint8)
-        rend.append((ord(ch), g, x0 - ox, y0 - by))
-    # 한글 세로 위치: 대문자 윗선(cap_top)에 '한'의 윗선을 맞춤
-    ytop = cap_top - hb[1]
+    px0 = px; hb0 = ImageFont.truetype(NANUM[w8], px0).getbbox('한', anchor='ls')
     oh, ow = f['img'].shape
-    rowh = max(g.shape[0] for _, g, _, _ in rend) + 1
-    # 원본 글리프 블록(ow x oh) 오른쪽 빈 곳부터 채우고, 텍스처 면적이 가장 작은 폭을 고른다
-    best = None
-    for W in (256, 512, 1024):
-        if W < ow: continue
-        x, y = 0, 0; place = []
-        for code, g, xo, yo in rend:
-            while True:
-                x0 = ow + 1 if y < oh + 1 else 0
-                x = max(x, x0)
-                if x + g.shape[1] <= W: break
-                x = 0; y += rowh
-            place.append((code, x, y, g, xo, yo)); x += g.shape[1] + 1
-        Ht = y + rowh
-        if Ht <= 1024 and (best is None or W * Ht < best[0] * best[1]): best = (W, Ht, place)
+    # 텍스처는 512x512(4bpp 128KB) 이하여야 한다. 게임의 VRAM 텍스처 캐시 칸이 512블록이라
+    # 더 크면 다음 칸으로 넘쳐 선수 사진 등에 덮여 글자가 깨진다(시즌 대진 화면). 안 들어가면 한 단계씩 줄인다.
+    while True:
+        font = ImageFont.truetype(NANUM[w8], px)
+        hb = font.getbbox('한', anchor='ls')
+        rend = []
+        for ch in chars:
+            a, ox, by = render(font, ch, px, shear)
+            ys, xs = np.nonzero(a)
+            if len(xs) == 0: continue
+            if ch in '·→↔…' and font.getbbox(ch)[2] == 0: continue
+            x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
+            g = np.clip((a[y0:y1, x0:x1].astype(np.int32) * 15 + 127) // 255, 0, 15).astype(np.uint8)
+            rend.append((ord(ch), g, x0 - ox, y0 - by))
+        best = pack_shelf(rend, ow, oh, MAXW, MAXH)
+        if best: break
+        px -= 1
+    # 한글 세로 위치: 대문자 윗선(cap_top)에 '한'의 윗선을 맞추고, 줄인 만큼은 가운데로
+    ytop = cap_top - hb[1] + ((hb0[3] - hb0[1]) - (hb[3] - hb[1])) // 2
+    INFO[name] = (px0, px)
     W, Ht, place = best
     Hp = (Ht + 3) & ~3
     img = np.zeros((Hp, W), np.uint8); img[:oh, :ow] = f['img']

@@ -13,12 +13,12 @@ python tools/build.py
 
 ## 차분 파일
 ```powershell
-.\xdelta.exe -e -0 -S none -A -s "MVP Baseball 2003 (USA).iso" "MVP Baseball 2003 (Korean).iso" MVP_Baseball_2003_PS2_KO_v1.3.xdelta
+.\xdelta.exe -e -0 -S none -A -s "MVP Baseball 2003 (USA).iso" "MVP Baseball 2003 (Korean).iso" MVP_Baseball_2003_PS2_KO_v1.4.xdelta
 ```
 
 ## 파일
 - `translation/ko1~5.txt`: `문자열ID|번역` (ENGLISH.LOC)
 - `translation/names.txt`: `영문 이름|한글 표기` (선수 DB·신인 이름 풀)
-- `tools/build.py`: 전체 빌드, `loc.py` LOC 표, `kfont.py` SFN 글꼴, `loadko.py` 로딩 화면, `names.py` 이름·ELF, `isobuild.py`·`isofs.py`·`udf.py` 디스크
+- `tools/build.py`: 전체 빌드, `loc.py` LOC 표, `kfont.py` SFN 글꼴, `loadko.py` 로딩 화면, `names.py` 이름·ELF, `fontmem.py` 폰트 메모리 배치(ELF), `isobuild.py`·`isofs.py`·`udf.py` 디스크
 - `tools/emu.ps1`, `tools/k.sh`: 검증용 PCSX2 조작 스크립트(개인 환경용)
-- `SLUS-20650_20A53021.pnach`: 16:9 와이드 패치
+- `SLUS-20650_926DD489.pnach`: 16:9 와이드 패치
