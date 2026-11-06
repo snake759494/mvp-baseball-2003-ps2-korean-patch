@@ -1,10 +1,10 @@
 # MVP 베이스볼 2003 PS2 한글패치
 
-PS2 북미판 **MVP Baseball 2003 (SLUS-20650)**용 비공식 한국어 패치입니다. **메뉴·옵션·시즌·프랜차이즈·경기 HUD 등 게임 문자열**, **로딩 화면 그림 15장**, **선수 이름 전부**(실제 선수 DB와 신인·드래프트 이름 풀)를 한국어로 바꿨습니다. PCSX2용 **16:9 와이드 패치**도 함께 배포합니다. 현재 배포판은 **v1.4 (2026-11-06)**입니다.
+PS2 북미판 **MVP Baseball 2003 (SLUS-20650)**용 비공식 한국어 패치입니다. **메뉴·옵션·시즌·프랜차이즈·경기 HUD 등 게임 문자열**, **로딩 화면 그림 15장**, **선수 이름 전부**(실제 선수 DB와 신인·드래프트 이름 풀)를 한국어로 바꿨습니다. PCSX2용 **16:9 와이드 패치**도 함께 배포합니다. 현재 배포판은 **v1.5 (2026-11-07)**입니다.
 
 [패치 다운로드](https://github.com/snake759494/mvp-baseball-2003-ps2-korean-patch/releases/latest) · [기술 설명](docs/TECHNICAL.md) · [재빌드](docs/BUILD.md) · [변경 기록](CHANGELOG.md) · [권리 안내](RIGHTS.md)
 
-릴리즈 첨부 파일은 한글패치 **MVP_Baseball_2003_PS2_KO_v1.4.xdelta**와 와이드 패치 **SLUS-20650_926DD489.pnach**입니다. 저장소에는 제작 소스와 한국어 번역만 공개합니다. 원본·완성 디스크 이미지, 추출한 게임 파일, 영어 원문, 글꼴 파일, 외부 실행 파일은 포함하지 않습니다. GitHub가 자동으로 만드는 Source code ZIP/TAR는 저장소 소스를 압축한 것이며 게임 파일이 아닙니다.
+릴리즈 첨부 파일은 한글패치 **MVP_Baseball_2003_PS2_KO_v1.5.xdelta**와 와이드 패치 **SLUS-20650_926DD489.pnach**입니다. 저장소에는 제작 소스와 한국어 번역만 공개합니다. 원본·완성 디스크 이미지, 추출한 게임 파일, 영어 원문, 글꼴 파일, 외부 실행 파일은 포함하지 않습니다. GitHub가 자동으로 만드는 Source code ZIP/TAR는 저장소 소스를 압축한 것이며 게임 파일이 아닙니다.
 
 ## 게임 소개 및 대상 버전
 
@@ -41,7 +41,7 @@ Get-FileHash -Algorithm MD5 -LiteralPath '.\MVP Baseball 2003 (USA).iso'
 
 ### xdelta UI 사용
 
-1. 릴리즈에서 `MVP_Baseball_2003_PS2_KO_v1.4.xdelta`를 받습니다.
+1. 릴리즈에서 `MVP_Baseball_2003_PS2_KO_v1.5.xdelta`를 받습니다.
 2. xdelta3 패치를 지원하는 도구에서 **Apply Patch** 기능을 엽니다.
 3. **Patch**에는 xdelta 파일을, **Source File**에는 해시가 일치하는 원본 `.iso`를 선택합니다.
 4. **Output File**에는 새 파일 이름을 지정합니다(예: `MVP Baseball 2003 (Korean).iso`).
@@ -51,7 +51,7 @@ xdelta는 호환성을 위해 압축·2차 압축·파일 경로 헤더 없이 �
 ### 명령줄 사용
 
 ```powershell
-.\xdelta3.exe -d -s '.\MVP Baseball 2003 (USA).iso' '.\MVP_Baseball_2003_PS2_KO_v1.4.xdelta' '.\MVP Baseball 2003 (Korean).iso'
+.\xdelta3.exe -d -s '.\MVP Baseball 2003 (USA).iso' '.\MVP_Baseball_2003_PS2_KO_v1.5.xdelta' '.\MVP Baseball 2003 (Korean).iso'
 ```
 
 원본판 세이브 스테이트는 쓰지 마세요. 메모리 카드 세이브는 원본판과 호환됩니다.
@@ -59,7 +59,7 @@ xdelta는 호환성을 위해 압축·2차 압축·파일 경로 헤더 없이 �
 
 ## 저메모리판 (Lite)
 
-ARMSX2·AetherSX2/NetherSX2 같은 모바일 에뮬레이터에서 시작할 때 튕긴다면 **MVP_Baseball_2003_PS2_KO_v1.4_Lite.xdelta**를 쓰세요. 적용 방법은 일반판과 같습니다.
+ARMSX2·AetherSX2/NetherSX2 같은 모바일 에뮬레이터에서 시작할 때 튕긴다면 **MVP_Baseball_2003_PS2_KO_v1.5_Lite.xdelta**를 쓰세요. 적용 방법은 일반판과 같습니다.
 
 - 실행 파일(SLUS_206.50)을 전혀 고치지 않아 게임 CRC가 원본과 같은 `55493524`입니다. 와이드 패치는 **SLUS-20650_55493524.pnach**를 씁니다.
 - 한글 폰트 텍스처를 512×256 이하로 줄였습니다. 폰트 묶음 크기는 일반판 약 950KB에서 약 230KB(원본 약 48KB)로 줄었습니다. 그 대신 한글 글자가 작습니다(11~13px).

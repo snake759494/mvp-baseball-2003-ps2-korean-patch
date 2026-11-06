@@ -13,7 +13,7 @@ python tools/build.py
 
 ## 차분 파일
 ```powershell
-.\xdelta.exe -e -0 -S none -A -s "MVP Baseball 2003 (USA).iso" "MVP Baseball 2003 (Korean).iso" MVP_Baseball_2003_PS2_KO_v1.4.xdelta
+.\xdelta.exe -e -0 -S none -A -s "MVP Baseball 2003 (USA).iso" "MVP Baseball 2003 (Korean).iso" MVP_Baseball_2003_PS2_KO_v1.5.xdelta
 ```
 
 ## 파일

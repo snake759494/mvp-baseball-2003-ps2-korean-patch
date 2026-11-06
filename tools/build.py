@@ -99,7 +99,7 @@ def main():
     from PIL import Image
     newf = {}
     for n in FONTS:
-        b, img = kfont.build(n, get('DATA/FONTS/' + n), chars_ui if n == 'AU20B_EN.SFN' else chars)
+        b, img = kfont.build(n, get('DATA/FONTS/' + n), chars)
         newf[n.lower()] = b; out['DATA/FONTS/' + n] = b
         Image.fromarray(img * 17).save(P('work', 'preview', n + '.png'))
         print(f'  {n}: 텍스처 {img.shape[1]}x{img.shape[0]}, 한글 {kfont.INFO[n][0]}->{kfont.INFO[n][1]}px')
