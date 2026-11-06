@@ -10,7 +10,8 @@ import loc, kfont, isobuild, isofs, c0fb, refpack
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 P = lambda *a: os.path.join(ROOT, *a)
 SRC = P('MVP Baseball 2003 (USA).iso')
-DST = P('MVP Baseball 2003 (Korean).iso')
+LITE = bool(os.environ.get('LITE'))   # 저메모리판: 실행 파일 무수정, 선수 이름 영문, 폰트 텍스처 축소
+DST = P('MVP Baseball 2003 (Korean Lite).iso' if LITE else 'MVP Baseball 2003 (Korean).iso')
 FONTS = list(kfont.CFG)
 # 공유 문자열을 따로 번역해야 하는 곳: 게임이 쓰지 않는 시험용 문자열(색인 3, 2185~2189)의 ID를 빌려 쓴다
 # (새 ID를 LOCI에 추가하면 화면에 나오지 않음)  {색인: (ID, 번역)}
@@ -68,6 +69,7 @@ def main():
     ko = lambda ss: {c for s in ss for c in s if ord(c) >= 0xac00 or 0x3131 <= ord(c) <= 0x318e or c in '·→↔…'}
     chars = sorted(ko(strs + [nchars]))   # UI 문자열 + 선수 이름
     chars_ui = sorted(ko(strs))
+    if LITE: chars = chars_ui; kfont.MAXW, kfont.MAXH = 512, int(os.environ.get('LITE_H', 256))
     if os.environ.get('TINY'): chars = chars_ui = sorted(set(os.environ['TINY']))   # AU20B(기울임 제목·메뉴체)는 선수 이름을 쓰지 않아 UI 글자만
     print(f'번역 {len(tr)}/{len(strs)}, 한글 {len(chars)}자')
     out['DATA/ENGLISH.LOC'] = loc.write(pre, lh, strs)
@@ -123,6 +125,8 @@ def main():
     out['DATA/FRONTEND/SUSHARED.BIG'], img = loadko.license(get('DATA/FRONTEND/SUSHARED.BIG'))
     img.save(P('work', 'preview', 'LICENSE.png'))
     # 선수 이름: ELF에 2바이트 한글 해석 패치 + DATABASE.BIG 이름 변환
+    if LITE:
+        isobuild.build(SRC, DST, out); print('완료:', DST); return
     import fontmem
     out['SLUS_206.50'] = fontmem.elf_patch(names.elf_patch(get('SLUS_206.50')))
     tb = names.load(P('translation', 'names.txt')); miss = set()
