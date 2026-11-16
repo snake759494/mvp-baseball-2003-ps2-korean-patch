@@ -32,9 +32,38 @@ IMMS = {
 }
 
 
+# 0x500920(넓은 문자열 <- char*, "\xHH" 처리) 복사 경로에 2바이트 한글 해석 추가 (순위표·박스 스코어 팀 이름 등)
+# 0x5009e0: addiu a1,a1,1 / sh v0,0(a0)  ->  j CAVE / nop
+CONV_AT, CONV_BACK, CAVE = 0x5009e0, 0x5009e8, 0x4e2e90   # CAVE: fontmem 표 뒤 빈 nop 자리
+
+
+def cave():
+    i = lambda op, rs, rt, im: (op << 26) | (rs << 21) | (rt << 16) | (im & 0xffff)
+    r = lambda rs, rt, rd, sa, fn: (rs << 21) | (rt << 16) | (rd << 11) | (sa << 6) | fn
+    at, v0, v1, a0, a1 = 1, 2, 3, 4, 5
+    return [
+        i(0x0b, v0, at, 0x80),          # sltiu at,v0,0x80
+        i(5, at, 0, 6),                 # bnez at,ST
+        i(9, a1, a1, 1),                # addiu a1,a1,1
+        i(0x24, a1, v1, 0),             # lbu v1,0(a1)
+        i(9, a1, a1, 1),                # addiu a1,a1,1
+        r(0, v0, v0, 7, 0),             # sll v0,v0,7
+        r(v0, v1, v0, 0, 0x21),         # addu v0,v0,v1
+        i(9, v0, v0, 0x6b80),           # addiu v0,v0,0x6b80
+        (2 << 26) | (CONV_BACK >> 2),   # ST: j CONV_BACK
+        i(0x29, a0, v0, 0),             # sh v0,0(a0)
+    ]
+
+
 def elf_patch(elf):
     e = bytearray(elf)
     o = lambda a: a - VA + OFF
+    w = lambda a: struct.unpack_from('<I', e, o(a))[0]
+    assert w(CONV_AT) == 0x24a50001 and w(CONV_AT + 4) == 0xa4820000, hex(w(CONV_AT))
+    code = cave()
+    assert all(w(CAVE + 4 * k) == 0 for k in range(len(code)))
+    for k, x in enumerate(code): struct.pack_into('<I', e, o(CAVE + 4 * k), x)
+    struct.pack_into('<II', e, o(CONV_AT), (2 << 26) | (CAVE >> 2), 0)
     for a, (old, new) in WORDS.items():
         assert struct.unpack_from('<I', e, o(a))[0] == old, hex(a)
         struct.pack_into('<I', e, o(a), new)

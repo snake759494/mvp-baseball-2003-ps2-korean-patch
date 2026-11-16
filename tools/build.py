@@ -21,11 +21,16 @@ FEL_EDIT = {
     ('fes_stadium.fel', 'LF'): dict(id=11, dx=-6), ('fes_stadium.fel', 'LC'): dict(id=14982, dx=-14, w=12),
     ('fes_stadium.fel', 'C'): dict(id=14984, dx=-6), ('fes_stadium.fel', 'RC'): dict(id=14985, dx=-14, w=12),
     ('fes_stadium.fel', 'RF'): dict(id=14986, dx=-6),
+    # 경기 중 주자 표시: 2B/3B가 기록용 '2루타/3루타'를 써서 '2루/3루'로
+    ('fes_ingameoverlay.fel', 'B2'): dict(id=3703), ('fes_ingameoverlay.fel', 'B3'): dict(id=3704),
+    # 경기 결과 창 승·패·세: 한글 이름(키가 큼)이 아래 성적 줄과 겹쳐 이름은 위로, 성적 줄은 아래로 (dy: 세로 이동)
+    ('fes_ingameendofgamemenu.fel', 'NAME'): dict(dy=-3),
+    **{('fes_ingameendofgamemenu.fel', n): dict(dy=4) for n in ('STATS', 'STAT1', 'STAT', 'DASH', 'PARA1', 'PARA2')},
 }
 # 목록 항목(TE:ID) 바꾸기: 자유계약·드래프트 포지션 필터의 2B/3B가 기록용 '2루타/3루타'(8202/8203)를 써서 '2루/3루'(3703/3704)로
 FEL_TE = {'fes_fdraftplayer.fel': {'8202': '3703', '8203': '3704'}}
 # 라인 스코어 R/H/E 머리글은 영문 유지(칸이 좁음). 기록표·박스 스코어는 statids.py가 화면별 문자열로 바꾼다
-# (INGAME.BIG은 크기가 늘면 경기 로딩이 멈출 수 있어 건드리지 않는다)
+# INGAME.BIG은 크기가 크게 늘면 경기 로딩이 멈출 수 있어 숫자만 바꾸는 최소 수정만 한다
 
 
 def reader():
@@ -58,7 +63,7 @@ def load_tr():
 def main():
     get = reader(); out = {}; errs = 0
     d = get('DATA/ENGLISH.LOC')
-    pre, lh, strs = loc.read(d)
+    pre, lh, strs = loc.read(d); en_strs = list(strs)
     tr = load_tr()
     for i, ko in tr.items():
         en = strs[i]
@@ -76,7 +81,7 @@ def main():
     print(f'번역 {len(tr)}/{len(strs)}, 한글 {len(chars)}자')
     out['DATA/ENGLISH.LOC'] = loc.write(pre, lh, strs)
     # 화면 레이아웃(FEL): 공유 문자열 분리(새 ID), 위치 보정
-    for big in ('FE_FRONTEND',):
+    for big in ('FE_FRONTEND', 'FE_INGAME'):
         fn = f'DATA/FRONTEND/{big[3:]}.BIG'
         ents = c0fb.files(get(fn)); changed = False
         for k, (nm, dat) in enumerate(ents):
@@ -88,12 +93,13 @@ def main():
                 s = l.lstrip(' ')
                 if s[:3] == 'TE:' and s[3:] in te:
                     lines[li] = l[:len(l) - len(s)] + 'TE:' + te[s[3:]]; continue
-                if s[:3] not in ('TX:', 'TB:'): continue
+                if s[:3] not in ('TX:', 'TB:', 'GR:'): continue
                 p = s[3:].split(',')
-                fi = [i for i, x in enumerate(p) if x.endswith('.sfn')][0]
-                v = eds.get(f'{p[0]}@{p[fi + 1]}') or eds.get(p[0])
+                fi = [i for i, x in enumerate(p) if x.endswith('.sfn')]
+                v = (fi and eds.get(f'{p[0]}@{p[fi[0] + 1]}')) or eds.get(p[0])
                 if not v: continue
-                if 'id' in v: p[fi + 1] = str(v['id'])
+                if 'id' in v: p[fi[0] + 1] = str(v['id'])
+                if 'dy' in v: p[4] = str(int(p[4]) + v['dy'])
                 if 'dx' in v: p[3] = str(int(p[3]) + v['dx'])
                 if 'w' in v: p[5] = str(int(p[5]) + v['w'])
                 lines[li] = l[:len(l) - len(s)] + s[:3] + ','.join(p)
@@ -137,6 +143,10 @@ def main():
     tb = names.load(P('translation', 'names.txt')); miss = set()
     ents = [(nm, refpack.compress(names.convert_dat(refpack.unpack(dat), tb, miss)))
             for nm, dat in c0fb.files(get('DATA/DATABASE.BIG'))]
+    # 팀 별칭(순위표·박스 스코어 등): LOC 별칭 번역(색인 287~316)으로 team.dat의 2번 필드를 바꾼다
+    teams = {en_strs[i]: strs[i] for i in range(287, 317)}
+    ents = [(nm, refpack.compress(re.sub(r',2 ([^,]*),', lambda m: ',2 %s,' % names.enc(teams.get(m.group(1), m.group(1))).decode('latin1'),
+                                         refpack.unpack(dat).decode('latin1')).encode('latin1')) if nm == 'team.dat' else dat) for nm, dat in ents]
     out['DATA/DATABASE.BIG'] = c0fb.write(ents)
     ents = [(nm, names.convert_csv(dat, tb, miss) if nm == 'names.csv' else dat)
             for nm, dat in c0fb.files(get('DATA/ROOKIE.BIG'))]
