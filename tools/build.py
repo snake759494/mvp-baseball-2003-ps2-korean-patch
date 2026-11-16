@@ -25,6 +25,10 @@ FEL_EDIT = {
     ('fes_ingameoverlay.fel', 'B2'): dict(id=3703), ('fes_ingameoverlay.fel', 'B3'): dict(id=3704),
     # 경기 결과 창 승·패·세: 한글 이름(키가 큼)이 아래 성적 줄과 겹쳐 이름은 위로, 성적 줄은 아래로 (dy: 세로 이동)
     ('fes_ingameendofgamemenu.fel', 'NAME'): dict(dy=-3),
+    # 감독 평점 자리표시가 수비 기록 A(보살, 색인 716)를 같이 써서 '보살'로 보여, 번역하지 않은 'A'(색인 368, ID 3030)로
+    **{(f_, n): dict(id=3030) for f_, ns in (('fes_fsplash_b.fel', ('MGRRATINGVAL', 'MGRRATINGVAL1')), ('fes_fteamgoals.fel', ('MGRRATINGVAL1', 'MGRRATINGVAL2'))) for n in ns},
+    # 프랜차이즈 구단 운영 메뉴 '팀 목표' 그림자: 폭 115 가운데 정렬이라 '목표'가 오른쪽에 따로 찍혀, 본문(TB)과 같은 폭·왼쪽 정렬로 (al: 정렬)
+    ('fes_fmanagerdecision.fel', 'TX1@6880'): dict(w=54, al=0),
     **{('fes_ingameendofgamemenu.fel', n): dict(dy=4) for n in ('STATS', 'STAT1', 'STAT', 'DASH', 'PARA1', 'PARA2')},
 }
 # 목록 항목(TE:ID) 바꾸기: 자유계약·드래프트 포지션 필터의 2B/3B가 기록용 '2루타/3루타'(8202/8203)를 써서 '2루/3루'(3703/3704)로
@@ -122,6 +126,7 @@ def main():
                 if 'dy' in v: p[4] = str(int(p[4]) + v['dy'])
                 if 'dx' in v: p[3] = str(int(p[3]) + v['dx'])
                 if 'w' in v: p[5] = str(int(p[5]) + v['w'])
+                if 'al' in v: p[fi[0] + 2] = str(v['al'])
                 lines[li] = l[:len(l) - len(s)] + s[:3] + ','.join(p)
             ents[k] = (nm, refpack.compress('\r\n'.join(lines).encode('latin1'))); changed = True
         if changed: out[fn] = c0fb.write(ents)

@@ -55,6 +55,37 @@ def cave():
     ]
 
 
+# 0x500a00(넓은 문자열 -> char*)는 0x100 이상 문자를 "\xXXXX"로 바꾸는데, 승·패 표시가 붙은 투수 이름처럼
+# 이 이스케이프를 풀지 않는 경로로 다시 그려지면 "\xc7ac..."가 그대로 보인다. 한글 음절은 2바이트 한글로 내보낸다.
+# 0x500a64: lhu a2,0(s1) / addiu a1,s2,0x7f48  ->  j CAVE2 / nop   (v1 = 문자, s0 = 쓰기 위치)
+ESC_AT, ESC_JAL, ESC_NEXT, CAVE2 = 0x500a64, 0x500a6c, 0x500a84, 0x4e2d00   # CAVE2: fontmem 코드 뒤 빈 자리
+
+
+def cave2():
+    i = lambda op, rs, rt, im: (op << 26) | (rs << 21) | (rt << 16) | (im & 0xffff)
+    r = lambda rs, rt, rd, sa, fn: (rs << 21) | (rt << 16) | (rd << 11) | (sa << 6) | fn
+    at, v0, v1, a1, a2, s0, s1, s2 = 1, 2, 3, 5, 6, 16, 17, 18
+    return [
+        i(0x0d, 0, at, 0xac00),         # ori at,zero,0xac00
+        r(v1, at, v0, 0, 0x23),         # subu v0,v1,at
+        i(0x0b, v0, at, 11172),         # sltiu at,v0,11172
+        i(4, at, 0, 9),                 # beqz at,FB
+        r(0, v0, at, 7, 2),             # srl at,v0,7
+        i(9, at, at, 0x80),             # addiu at,at,0x80
+        i(0x28, s0, at, 0),             # sb at,0(s0)
+        i(0x0c, v0, v0, 0x7f),          # andi v0,v0,0x7f
+        i(9, v0, v0, 0x80),             # addiu v0,v0,0x80
+        i(0x28, s0, v0, 1),             # sb v0,1(s0)
+        i(9, s0, s0, 2),                # addiu s0,s0,2
+        (2 << 26) | (ESC_NEXT >> 2),    # j ESC_NEXT
+        0,
+        i(0x25, s1, a2, 0),             # FB: lhu a2,0(s1)   (원래 명령)
+        i(9, s2, a1, 0x7f48),           # addiu a1,s2,0x7f48
+        (2 << 26) | (ESC_JAL >> 2),     # j ESC_JAL (sprintf "\x%04x")
+        0,
+    ]
+
+
 def elf_patch(elf):
     e = bytearray(elf)
     o = lambda a: a - VA + OFF
@@ -64,6 +95,11 @@ def elf_patch(elf):
     assert all(w(CAVE + 4 * k) == 0 for k in range(len(code)))
     for k, x in enumerate(code): struct.pack_into('<I', e, o(CAVE + 4 * k), x)
     struct.pack_into('<II', e, o(CONV_AT), (2 << 26) | (CAVE >> 2), 0)
+    assert w(ESC_AT) == 0x96260000 and w(ESC_AT + 4) == 0x26457f48, hex(w(ESC_AT))
+    code = cave2()
+    assert all(w(CAVE2 + 4 * k) == 0 for k in range(len(code)))
+    for k, x in enumerate(code): struct.pack_into('<I', e, o(CAVE2 + 4 * k), x)
+    struct.pack_into('<II', e, o(ESC_AT), (2 << 26) | (CAVE2 >> 2), 0)
     for a, (old, new) in WORDS.items():
         assert struct.unpack_from('<I', e, o(a))[0] == old, hex(a)
         struct.pack_into('<I', e, o(a), new)
