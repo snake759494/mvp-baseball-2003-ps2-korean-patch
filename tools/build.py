@@ -28,6 +28,12 @@ FEL_EDIT = {
     **{('fes_ingameendofgamemenu.fel', n): dict(dy=4) for n in ('STATS', 'STAT1', 'STAT', 'DASH', 'PARA1', 'PARA2')},
 }
 # 목록 항목(TE:ID) 바꾸기: 자유계약·드래프트 포지션 필터의 2B/3B가 기록용 '2루타/3루타'(8202/8203)를 써서 '2루/3루'(3703/3704)로
+# 박스 스코어: 숫자 칸(폭 23)이 좁아 한글 머리글(타수·득점·안타…)이 붙어 보여, 이름 칸(210)을 150으로 줄이고
+# 숫자 칸을 폭 31, 간격 38로 다시 배치한다. 메뉴 화면 두 벌과 경기 중 화면(이름 칸 x 55·63)  {원래 x: 새 x}
+_bx = [0, 39, 71, 103, 135, 175, 207, 239]
+BOX_X = {}
+for _b in (279, 266):
+    for _k, _o in enumerate(_bx): BOX_X[_b + _o] = _b - 46 + 38 * _k
 FEL_TE = {'fes_fdraftplayer.fel': {'8202': '3703', '8203': '3704'}}
 # 라인 스코어 R/H/E 머리글은 영문 유지(칸이 좁음). 기록표·박스 스코어는 statids.py가 화면별 문자열로 바꾼다
 # INGAME.BIG은 크기가 크게 늘면 경기 로딩이 멈출 수 있어 숫자만 바꾸는 최소 수정만 한다
@@ -87,14 +93,22 @@ def main():
         for k, (nm, dat) in enumerate(ents):
             eds = {e: v for (f_, e), v in FEL_EDIT.items() if f_ == nm}
             te = FEL_TE.get(nm, {})
-            if not eds and not te: continue
+            box = nm in ('fes_boxscores.fel', 'fes_ingameboxscore.fel')
+            if not eds and not te and not box: continue
             lines = refpack.unpack(dat).decode('latin1').split('\r\n')
+            bd = (0, 0)
             for li, l in enumerate(lines):
                 s = l.lstrip(' ')
                 if s[:3] == 'TE:' and s[3:] in te:
                     lines[li] = l[:len(l) - len(s)] + 'TE:' + te[s[3:]]; continue
                 if s[:3] not in ('TX:', 'TB:', 'GR:'): continue
                 p = s[3:].split(',')
+                if box and p[0][:1] == 'X' and s[:3] == 'GR:':
+                    x, w = int(p[3]), int(p[5])   # 칸(GR)을 옮기고, 바로 안의 글자(TB)도 같은 만큼 옮긴다
+                    bd = (0, -60) if w == 210 else (BOX_X[x] - x, max(w, 31) - w) if x in BOX_X else (0, 0)
+                if box and p[0][:1] == 'X' and s[:3] == 'GR:' or box and s[:3] == 'TB:' and p[0] in ('NAME', 'NUM'):
+                    p[3] = str(int(p[3]) + bd[0]); p[5] = str(int(p[5]) + bd[1])
+                    lines[li] = l[:len(l) - len(s)] + s[:3] + ','.join(p); continue
                 fi = [i for i, x in enumerate(p) if x.endswith('.sfn')]
                 v = (fi and eds.get(f'{p[0]}@{p[fi[0] + 1]}')) or eds.get(p[0])
                 if not v: continue
