@@ -34,6 +34,8 @@ _bx = [0, 39, 71, 103, 135, 175, 207, 239]
 BOX_X = {}
 for _b in (279, 266):
     for _k, _o in enumerate(_bx): BOX_X[_b + _o] = _b - 46 + 38 * _k
+# 투수 소개 창(STATS5: 승·패·세이브·삼진·ERA): 44px 간격이라 '세이브삼진'이 붙어 보여 52px 간격으로  {원래 x: 새 x}
+OV_X = {139 + 44 * k: 139 + 52 * k for k in range(5)}
 FEL_TE = {'fes_fdraftplayer.fel': {'8202': '3703', '8203': '3704'}}
 # 라인 스코어 R/H/E 머리글은 영문 유지(칸이 좁음). 기록표·박스 스코어는 statids.py가 화면별 문자열로 바꾼다
 # INGAME.BIG은 크기가 크게 늘면 경기 로딩이 멈출 수 있어 숫자만 바꾸는 최소 수정만 한다
@@ -103,6 +105,10 @@ def main():
                     lines[li] = l[:len(l) - len(s)] + 'TE:' + te[s[3:]]; continue
                 if s[:3] not in ('TX:', 'TB:', 'GR:'): continue
                 p = s[3:].split(',')
+                if nm == 'fes_ingameoverlay.fel' and s[:3] == 'TX:' and p[4] in ('374', '390') and p[5] == '46' and int(p[3]) in OV_X:
+                    p[3] = str(OV_X[int(p[3])]); lines[li] = l[:len(l) - len(s)] + s[:3] + ','.join(p); continue
+                if nm == 'fes_ingameoverlay.fel' and s.startswith('GR:STATS5,'):
+                    p[5] = str(int(p[5]) + 32); lines[li] = l[:len(l) - len(s)] + s[:3] + ','.join(p); continue
                 if box and p[0][:1] == 'X' and s[:3] == 'GR:':
                     x, w = int(p[3]), int(p[5])   # 칸(GR)을 옮기고, 바로 안의 글자(TB)도 같은 만큼 옮긴다
                     bd = (0, -60) if w == 210 else (BOX_X[x] - x, max(w, 31) - w) if x in BOX_X else (0, 0)
