@@ -22,7 +22,9 @@ FEL_EDIT = {
     ('fes_stadium.fel', 'C'): dict(id=14984, dx=-6), ('fes_stadium.fel', 'RC'): dict(id=14985, dx=-14, w=12),
     ('fes_stadium.fel', 'RF'): dict(id=14986, dx=-6),
 }
-# 라인 스코어 R/H/E 머리글은 기록표의 R/H/E와 문자열을 공유하고 칸이 좁아 영문 유지
+# 목록 항목(TE:ID) 바꾸기: 자유계약·드래프트 포지션 필터의 2B/3B가 기록용 '2루타/3루타'(8202/8203)를 써서 '2루/3루'(3703/3704)로
+FEL_TE = {'fes_fdraftplayer.fel': {'8202': '3703', '8203': '3704'}}
+# 라인 스코어 R/H/E 머리글은 영문 유지(칸이 좁음). 기록표·박스 스코어는 statids.py가 화면별 문자열로 바꾼다
 # (INGAME.BIG은 크기가 늘면 경기 로딩이 멈출 수 있어 건드리지 않는다)
 
 
@@ -79,10 +81,13 @@ def main():
         ents = c0fb.files(get(fn)); changed = False
         for k, (nm, dat) in enumerate(ents):
             eds = {e: v for (f_, e), v in FEL_EDIT.items() if f_ == nm}
-            if not eds: continue
+            te = FEL_TE.get(nm, {})
+            if not eds and not te: continue
             lines = refpack.unpack(dat).decode('latin1').split('\r\n')
             for li, l in enumerate(lines):
                 s = l.lstrip(' ')
+                if s[:3] == 'TE:' and s[3:] in te:
+                    lines[li] = l[:len(l) - len(s)] + 'TE:' + te[s[3:]]; continue
                 if s[:3] not in ('TX:', 'TB:'): continue
                 p = s[3:].split(',')
                 fi = [i for i, x in enumerate(p) if x.endswith('.sfn')][0]
@@ -127,8 +132,8 @@ def main():
     # 선수 이름: ELF에 2바이트 한글 해석 패치 + DATABASE.BIG 이름 변환
     if LITE:
         isobuild.build(SRC, DST, out); print('완료:', DST); return
-    import fontmem
-    out['SLUS_206.50'] = fontmem.elf_patch(names.elf_patch(get('SLUS_206.50')))
+    import fontmem, statids
+    out['SLUS_206.50'] = statids.elf_patch(fontmem.elf_patch(names.elf_patch(get('SLUS_206.50'))))
     tb = names.load(P('translation', 'names.txt')); miss = set()
     ents = [(nm, refpack.compress(names.convert_dat(refpack.unpack(dat), tb, miss)))
             for nm, dat in c0fb.files(get('DATA/DATABASE.BIG'))]
