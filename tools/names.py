@@ -9,7 +9,7 @@ DB(DATA/DATABASE.BIG)의 이름은 1바이트 ASCII이고, 게임은 0x5007d8(ch
 import os, re, struct
 
 VA, OFF = 0x100000, 0x1000   # SLUS_206.50 .text 적재 주소와 파일 오프셋
-R = dict(zero=0, v0=2, v1=3, a0=4, a1=5, a2=6, a3=7, s1=17, s2=18, s4=20, s5=21, sp=29, ra=31)
+R = dict(zero=0, v0=2, v1=3, a0=4, a1=5, a2=6, a3=7, s0=16, s1=17, s2=18, s4=20, s5=21, sp=29, ra=31)
 
 
 def _r(op, rs, rt, rd, sa, fn): return (op << 26) | (R[rs] << 21) | (R[rt] << 16) | (R[rd] << 11) | (sa << 6) | fn
@@ -67,6 +67,17 @@ def elf_patch(elf):
         _i(0x28, 'v1', 'zero', 0x81),                # sb zero,0x81(v1)
         0, 0,
     ])
+    # 0x28de40: names.csv(신인 이름 풀) 줄 머리에서 영문자가 나올 때까지 건너뛴다. 한글 바이트(0x80~)도 글자로 보게 한다.
+    D = 0x28de40
+    assert struct.unpack_from('<3I', e, D - VA + OFF) == (0x82030000, 0x2462ff9f, 0x2c42001a)
+    put(D, [
+        _i(0x24, 's0', 'v1', 0),                     # lbu v1,0(s0) (원래 lb)
+        0x2462ff9f,                                  # addiu v0,v1,-0x61
+        _i(0x0b, 'v0', 'v0', 0x9f),                  # sltiu v0,v0,0x9f (a~z와 0x80~0xff)
+    ])
+    # 다음 줄로 돌아가는 분기 지연 슬롯(0x28e044)도 같은 바이트를 읽으므로 lbu로 (lb면 첫 한글 바이트를 건너뜀)
+    assert struct.unpack_from('<I', e, 0x28e044 - VA + OFF)[0] == 0x82030000
+    put(0x28e044, [_i(0x24, 's0', 'v1', 0)])
     return bytes(e)
 
 
@@ -117,7 +128,9 @@ def convert_csv(dat, tb, miss):
         if len(p) != 3: continue
         for k in (0, 1):
             if p[k] not in tb: miss.add(p[k])
-            p[k] = enc(tb.get(p[k], p[k])).decode('latin1')
+            b = enc(tb.get(p[k], p[k]))
+            if len(b) > (10, 13)[k]: b = b.replace(b' ', b'')   # 게임 칸: 이름 10바이트, 성 13바이트
+            p[k] = b.decode('latin1')
         lines[i] = ','.join(p)
     return CRLF.join(lines).encode('latin1')
 
